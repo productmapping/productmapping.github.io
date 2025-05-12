@@ -4,6 +4,7 @@ import { useFileProcessing } from '@/contexts/FileProcessingContext';
 import Layout from '@/components/Layout';
 import FileUploader from '@/components/FileUploader';
 import ProductTable from '@/components/ProductTable';
+import { Progress } from '@/components/ui/progress';
 import { 
   Card, 
   CardContent, 
@@ -20,7 +21,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Check, Download, File, X, FileUp, Edit, ArrowRight } from 'lucide-react';
+import { Check, Download, File, X, FileUp, Edit, ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,6 +35,7 @@ const Home: React.FC = () => {
     analyzedProducts,
     isLoading,
     isAnalyzing,
+    loadingProgress,
     setFile,
     setSelectedSheet,
     updateProduct,
@@ -60,10 +62,17 @@ const Home: React.FC = () => {
       setFileName('');
     }
   }, [file]);
+
+  // Scroll to results section when analysis is complete
+  useEffect(() => {
+    // If we were analyzing and now we're not, and we have results
+    if (!isAnalyzing && analyzedProducts.length > 0) {
+      scrollToSection(resultRef, 'result');
+    }
+  }, [isAnalyzing, analyzedProducts.length]);
   
   const handleSheetChange = (value: string) => {
     setSelectedSheet(value);
-    // In a real app, we would re-extract products from the newly selected sheet
   };
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>, section?: 'upload' | 'extract' | 'result') => {
@@ -96,6 +105,14 @@ const Home: React.FC = () => {
     }
   };
 
+  // Wrap the original analyzeProducts function to handle additional UI logic
+  const handleAnalyzeClick = async () => {
+    // Scroll to results section immediately after clicking
+    scrollToSection(resultRef, 'result');
+    // Start the analysis process
+    await analyzeProducts();
+  };
+
   const goToReferencePage = () => {
     navigate('/reference');
   };
@@ -106,7 +123,7 @@ const Home: React.FC = () => {
   
   return (
     <Layout>
-      <div className="space-y-10">
+      <div className="space-y-8 max-w-full">
         <div className="text-center">
           <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-4">
             {t('home.title')}
@@ -181,10 +198,10 @@ const Home: React.FC = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" ref={uploadRef}>
+        <div className="grid grid-cols-1 md:grid-cols-10 gap-6" ref={uploadRef}>
           {/* Upload Card */}
           <Card className={cn(
-            "high-tech-card",
+            "high-tech-card md:col-span-3",
             highlightClass,
             highlightUpload && "animate-pulse-gentle"
           )}>
@@ -194,7 +211,20 @@ const Home: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {fileName ? (
+                {isLoading && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">{t('home.upload.processing')}</span>
+                      <span className="text-sm font-medium">{Math.round(loadingProgress)}%</span>
+                    </div>
+                    <Progress value={loadingProgress} className="h-2" />
+                    <p className="text-sm text-muted-foreground text-center mt-2">
+                      {loadingProgress < 100 ? t('home.upload.pleaseWait') : t('home.upload.completed')}
+                    </p>
+                  </div>
+                )}
+                
+                {!isLoading && (fileName ? (
                   <div className="flex items-center p-4 bg-secondary rounded-lg">
                     <File className="h-6 w-6 mr-2" />
                     <div className="flex-1 min-w-0">
@@ -217,7 +247,7 @@ const Home: React.FC = () => {
                     onFileSelected={setFile}
                     className="w-full"
                   />
-                )}
+                ))}
                 
                 {sheetNames.length > 0 && (
                   <div className="space-y-2">
@@ -242,50 +272,51 @@ const Home: React.FC = () => {
           
           {/* Extracted Products Card */}
           <Card className={cn(
-            "high-tech-card",
+            "high-tech-card md:col-span-7",
             highlightClass,
             highlightExtract && "animate-pulse-gentle"
           )} ref={extractRef}>
-            <CardHeader>
-              <CardTitle>{t('home.extracted.title')}</CardTitle>
-              <CardDescription>
-                {extractedProducts.length 
-                  ? `${extractedProducts.length} products extracted` 
-                  : t('home.extracted.noData')
-                }
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>{t('home.extracted.title')}</CardTitle>
+                <CardDescription>
+                  {extractedProducts.length 
+                    ? `${extractedProducts.length} products extracted` 
+                    : t('home.extracted.noData')
+                  }
+                </CardDescription>
+              </div>
+              
+              {/* Confirm & Analyze button in the header */}
+              {extractedProducts.length > 0 && (
+                <Button 
+                  disabled={isAnalyzing || extractedProducts.length === 0}
+                  onClick={handleAnalyzeClick}
+                  className="bg-tech-blue hover:bg-tech-blue/90"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('common.loading')}
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      {t('home.actions.confirm')}
+                    </>
+                  )}
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="rounded-lg overflow-hidden">
+                <div className="rounded-lg">
                   <ProductTable
                     products={extractedProducts}
                     onEdit={updateProduct}
                     onDelete={deleteProduct}
                   />
                 </div>
-                
-                {extractedProducts.length > 0 && (
-                  <div className="flex justify-end">
-                    <Button 
-                      disabled={isAnalyzing || extractedProducts.length === 0}
-                      onClick={analyzeProducts}
-                      className="bg-tech-blue hover:bg-tech-blue/90"
-                    >
-                      {isAnalyzing ? (
-                        <>
-                          <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                          {t('common.loading')}
-                        </>
-                      ) : (
-                        <>
-                          <Check className="mr-2 h-4 w-4" />
-                          {t('home.actions.confirm')}
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -321,10 +352,12 @@ const Home: React.FC = () => {
             )}
           </CardHeader>
           <CardContent>
-            <ProductTable
-              products={analyzedProducts}
-              isAnalyzedData={true}
-            />
+            <div>
+              <ProductTable
+                products={analyzedProducts}
+                isAnalyzedData={true}
+              />
+            </div>
           </CardContent>
           {analyzedProducts.length > 0 && (
             <CardFooter className="flex justify-center pt-4 pb-6">

@@ -87,6 +87,18 @@ const translations: Translations = {
     en: 'Supported formats: .xlsx, .xls',
     vi: 'Định dạng được hỗ trợ: .xlsx, .xls',
   },
+  'home.upload.processing': {
+    en: 'Processing file',
+    vi: 'Đang xử lý tệp',
+  },
+  'home.upload.pleaseWait': {
+    en: 'Please wait while we extract data from your file...',
+    vi: 'Vui lòng đợi trong khi chúng tôi trích xuất dữ liệu từ tệp của bạn...',
+  },
+  'home.upload.completed': {
+    en: 'Processing completed!',
+    vi: 'Đã hoàn thành xử lý!',
+  },
   'home.sheet.title': {
     en: 'Sheet Selection',
     vi: 'Chọn Sheet',
@@ -106,6 +118,22 @@ const translations: Translations = {
   'home.extracted.name': {
     en: 'Product Name',
     vi: 'Tên Sản Phẩm',
+  },
+  'home.extracted.spec': {
+    en: 'Specification',
+    vi: 'Thông số kỹ thuật',
+  },
+  'home.extracted.unit': {
+    en: 'Unit',
+    vi: 'Đơn vị',
+  },
+  'home.extracted.mass': {
+    en: 'Total Mass',
+    vi: 'Khối lượng',
+  },
+  'home.extracted.category': {
+    en: 'Category',
+    vi: 'Danh mục',
   },
   'home.extracted.actions': {
     en: 'Actions',
@@ -139,6 +167,10 @@ const translations: Translations = {
   'analysis.title': {
     en: 'Analysis Results',
     vi: 'Kết quả phân tích',
+  },
+  'analysis.analyzing': {
+    en: 'Analyzing products',
+    vi: 'Đang phân tích sản phẩm',
   },
   'analysis.id': {
     en: 'ID',
@@ -241,6 +273,34 @@ const translations: Translations = {
   'common.backToHome': {
     en: 'Back to Home',
     vi: 'Trở về Trang chủ',
+  },
+  'common.itemsPerPage': {
+    en: 'Items per page',
+    vi: 'Mục mỗi trang',
+  },
+  'common.of': {
+    en: 'of',
+    vi: 'của',
+  },
+  'common.page': {
+    en: 'Page',
+    vi: 'Trang',
+  },
+  'common.first': {
+    en: 'First',
+    vi: 'Đầu tiên',
+  },
+  'common.last': {
+    en: 'Last',
+    vi: 'Cuối cùng',
+  },
+  'common.next': {
+    en: 'Next',
+    vi: 'Tiếp theo',
+  },
+  'common.previous': {
+    en: 'Previous',
+    vi: 'Trước đó',
   },
 };
 

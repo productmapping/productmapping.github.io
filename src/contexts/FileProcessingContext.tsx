@@ -1,10 +1,18 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
 import { toast } from '@/components/ui/sonner';
 
 // Define our types
+export interface Category {
+  category_name: string;
+  category_level: number;
+}
+
 export interface Product {
-  id: string;
-  name: string;
+  item_name: string;
+  item_spec: string | null;
+  item_unit: string | null;
+  item_total_mass: string | null;
+  categories: Category[];
 }
 
 export interface AnalyzedProduct extends Product {
@@ -20,6 +28,11 @@ export interface ReferenceFile {
   dateUploaded: Date;
 }
 
+// API response type for extracting Excel data
+export interface ExcelExtractResponse {
+  [sheetName: string]: Product[];
+}
+
 interface FileProcessingContextType {
   file: File | null;
   sheetNames: string[];
@@ -29,6 +42,7 @@ interface FileProcessingContextType {
   referenceFiles: ReferenceFile[];
   isLoading: boolean;
   isAnalyzing: boolean;
+  loadingProgress: number;
   
   setFile: (file: File | null) => void;
   setSheetNames: (sheets: string[]) => void;
@@ -62,11 +76,41 @@ const extractProductsFromSheet = async (file: File, sheetName: string): Promise<
   return new Promise((resolve) => {
     setTimeout(() => {
       const mockProducts: Product[] = [
-        { id: 'P001', name: 'Laptop Dell XPS 13' },
-        { id: 'P002', name: 'iPhone 13 Pro' },
-        { id: 'P003', name: 'Samsung Galaxy S22' },
-        { id: 'P004', name: 'Sony WH-1000XM4' },
-        { id: 'P005', name: 'HP Spectre x360' },
+        {
+          item_name: 'Laptop Dell XPS 13',
+          item_spec: '13-inch, 8GB RAM',
+          item_unit: 'pcs',
+          item_total_mass: '1.2kg',
+          categories: [{ category_name: 'Electronics', category_level: 1 }]
+        },
+        {
+          item_name: 'iPhone 13 Pro',
+          item_spec: '128GB, Graphite',
+          item_unit: 'pcs',
+          item_total_mass: '0.5kg',
+          categories: [{ category_name: 'Electronics', category_level: 1 }]
+        },
+        {
+          item_name: 'Samsung Galaxy S22',
+          item_spec: '256GB, Phantom Black',
+          item_unit: 'pcs',
+          item_total_mass: '0.6kg',
+          categories: [{ category_name: 'Electronics', category_level: 1 }]
+        },
+        {
+          item_name: 'Sony WH-1000XM4',
+          item_spec: 'Noise Cancelling Headphones',
+          item_unit: 'pcs',
+          item_total_mass: '0.3kg',
+          categories: [{ category_name: 'Accessories', category_level: 2 }]
+        },
+        {
+          item_name: 'HP Spectre x360',
+          item_spec: '15-inch, 16GB RAM',
+          item_unit: 'pcs',
+          item_total_mass: '2.0kg',
+          categories: [{ category_name: 'Electronics', category_level: 1 }]
+        },
       ];
       resolve(mockProducts);
     }, 1500);
@@ -99,6 +143,19 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
   const [referenceFiles, setReferenceFiles] = useState<ReferenceFile[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  // Store the full API response to access different sheets
+  const [allSheetData, setAllSheetData] = useState<ExcelExtractResponse>({});
+  
+  // Reference to track if component is mounted
+  const isMounted = useRef(true);
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleFileUpload = async (file: File | null) => {
     if (!file) {
@@ -106,30 +163,73 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       setSelectedSheet('');
       setExtractedProducts([]);
       setAnalyzedProducts([]);
+      setAllSheetData({});
+      setLoadingProgress(0);
       return;
     }
     
     setIsLoading(true);
+    setLoadingProgress(0);
+    
     try {
-      const sheets = await extractSheetsFromExcel(file);
-      setSheetNames(sheets);
+      // Simulate a 15-second API call with incremental progress updates
+      const progressInterval = setInterval(() => {
+        if (isMounted.current) {
+          setLoadingProgress(prev => {
+            const newProgress = prev + (100 - prev) * 0.1;
+            return newProgress > 95 ? 95 : newProgress; // Cap at 95% until actually complete
+          });
+        }
+      }, 500);
       
-      // Auto-select the first sheet
-      if (sheets.length > 0) {
-        const selectedSheet = sheets[0];
-        setSelectedSheet(selectedSheet);
-        
-        // Auto-extract products from the selected sheet
-        const products = await extractProductsFromSheet(file, selectedSheet);
-        setExtractedProducts(products);
+      // Create FormData for API call
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Make API call to extract data from Excel
+      const response = await fetch('http://0.0.0.0:8000/bid/extract_items_from_excel', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      clearInterval(progressInterval);
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
       
+      const data: ExcelExtractResponse = await response.json();
+      setAllSheetData(data);
+      
+      // Extract sheet names from API response
+      const sheets = Object.keys(data);
+      setSheetNames(sheets);
+      
+      if (sheets.length > 0) {
+        const firstSheet = sheets[0];
+        setSelectedSheet(firstSheet);
+        setExtractedProducts(data[firstSheet]);
+      } else {
+        setExtractedProducts([]);
+      }
+      
+      setLoadingProgress(100);
       toast.success('File processed successfully');
     } catch (error) {
       console.error('Error processing file:', error);
       toast.error('Error processing file. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Handle sheet selection
+  const handleSheetChange = (sheetName: string) => {
+    setSelectedSheet(sheetName);
+    if (allSheetData[sheetName]) {
+      setExtractedProducts(allSheetData[sheetName]);
+    } else {
+      setExtractedProducts([]);
     }
   };
 
@@ -175,8 +275,8 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       headers.join(','),
       ...analyzedProducts.map(product => 
         [
-          product.id,
-          `"${product.name.replace(/"/g, '""')}"`, // Escape quotes for CSV
+          product.item_name,
+          `"${product.item_spec?.replace(/"/g, '""') || ''}"`, // Escape quotes for CSV
           product.price,
           product.provider,
           product.origin,
@@ -225,12 +325,13 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         referenceFiles,
         isLoading,
         isAnalyzing,
+        loadingProgress,
         setFile: (file) => {
           setFile(file);
           handleFileUpload(file);
         },
         setSheetNames,
-        setSelectedSheet,
+        setSelectedSheet: handleSheetChange,
         setExtractedProducts,
         updateProduct,
         deleteProduct,

@@ -6,8 +6,8 @@
     <title>AI Product Analyzer</title>
     <meta name="description" content="AI-powered product analysis tool for extracting and analyzing product data from Excel files" />
     <meta name="author" content="AI Product Analyzer" />
-    <!-- Add base tag to ensure proper path resolution -->
-    <base href="/" />
+    <!-- Remove the base tag as it can cause issues with GitHub Pages -->
+    <!-- <base href="/" /> -->
 
     <meta property="og:title" content="AI Product Analyzer" />
     <meta property="og:description" content="AI-powered product analysis tool for extracting and analyzing product data from Excel files" />
@@ -17,12 +17,25 @@
     <!-- <meta name="twitter:card" content="summary_large_image" /> -->
     <!-- <meta name="twitter:site" content="@lovable_dev" /> -->
     <!-- <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" /> -->
+    
+    <!-- GitHub Pages SPA redirect handling -->
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // Handle redirects from 404.html
+      (function() {
+        const redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
   </head>
 
   <body>
     <div id="root"></div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>

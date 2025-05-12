@@ -4,27 +4,13 @@
   <meta charset="utf-8">
   <title>Redirecting...</title>
   <script>
-    // Single Page Apps for GitHub Pages
-    // MIT License: https://github.com/rafgraph/spa-github-pages
-    const pathSegmentsToKeep = 0;
-    
-    let l = window.location;
-    if (l.search[1]) {
-      var decoded = l.search.slice(1).split('&').map(function(s) { 
-        return s.replace(/~and~/g, '&')
-      }).join('?');
-      window.history.replaceState(null, null,
-          l.pathname.slice(0, -1) + decoded + l.hash
-      );
-    }
-    
-    // Redirect to the root path with a hash
-    // For organization/user sites, there's no repo prefix
-    const path = window.location.pathname;
-    window.location.href = '/#' + path;
+    // GitHub Pages SPA redirect script
+    // This handles the single-page app routing when a direct URL is accessed
+    sessionStorage.redirect = location.href;
   </script>
+  <meta http-equiv="refresh" content="0;URL='/'">
 </head>
 <body>
-  Redirecting...
+  Redirecting to the homepage...
 </body>
 </html>

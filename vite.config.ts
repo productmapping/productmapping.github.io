@@ -19,11 +19,19 @@ export default defineConfig(({ mode }) => ({
           vendor: ['react', 'react-dom'],
         },
         // Ensure correct MIME type handling
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
       }
-    }
+    },
+    // Add these options to help with GitHub Pages deployment
+    sourcemap: true,
+    // Explicitly set manifest to ensure proper asset loading
+    manifest: true,
+    // Ensure proper ESM module output
+    modulePreload: {
+      polyfill: true,
+    },
   },
   plugins: [
     react(),

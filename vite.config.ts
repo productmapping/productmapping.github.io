@@ -5,8 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Add base path for GitHub Pages - use your repository name
-  base: '/data-harvest-ai-hub/',
+  // For GitHub Pages with user/organization site, base should be '/'
+  // since it will be served from the root
+  base: '/',
   server: {
     host: "::",
     port: 8080,

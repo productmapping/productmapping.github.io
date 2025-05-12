@@ -6,7 +6,7 @@
   <script>
     // Single Page Apps for GitHub Pages
     // MIT License: https://github.com/rafgraph/spa-github-pages
-    const pathSegmentsToKeep = 1;
+    const pathSegmentsToKeep = 0;
     
     let l = window.location;
     if (l.search[1]) {
@@ -19,9 +19,9 @@
     }
     
     // Redirect to the root path with a hash
-    const repo = '/data-harvest-ai-hub';
-    const path = window.location.pathname.slice(repo.length);
-    window.location.href = repo + '/#' + path;
+    // For organization/user sites, there's no repo prefix
+    const path = window.location.pathname;
+    window.location.href = '/#' + path;
   </script>
 </head>
 <body>

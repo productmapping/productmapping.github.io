@@ -5,8 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Using relative paths for assets makes it work in more environments
-  base: './',
+  // Using a proper base path for GitHub Pages
+  base: '/',
   server: {
     host: "::",
     port: 8080,

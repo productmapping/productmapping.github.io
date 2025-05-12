@@ -11,6 +11,20 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     // port: 8080,
   },
+  build: {
+    // Ensure proper file naming and chunking for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+        },
+        // Ensure correct MIME type handling
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
+    }
+  },
   plugins: [
     react(),
     mode === 'development' &&

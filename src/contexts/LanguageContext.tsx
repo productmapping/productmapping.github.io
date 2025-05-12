@@ -22,7 +22,7 @@ const translations: Translations = {
     vi: 'Trang chủ',
   },
   'nav.reference': {
-    en: 'Reference Files',
+    en: 'Provider Files',
     vi: 'Tệp tham khảo',
   },
   // Step-by-step guide
@@ -170,7 +170,7 @@ const translations: Translations = {
   },
   // Reference page
   'reference.title': {
-    en: 'Reference Files',
+    en: 'Provider Files',
     vi: 'Tệp Tham Khảo',
   },
   'reference.subtitle': {
@@ -178,7 +178,7 @@ const translations: Translations = {
     vi: 'Tải lên tệp Excel cho thông tin tham khảo giá',
   },
   'reference.upload.title': {
-    en: 'Upload Reference File',
+    en: 'Upload Provider File',
     vi: 'Tải lên tệp tham khảo',
   },
   'reference.upload.button': {
@@ -186,7 +186,7 @@ const translations: Translations = {
     vi: 'Tải lên tệp',
   },
   'reference.files.title': {
-    en: 'Uploaded Reference Files',
+    en: 'Uploaded Provider Files',
     vi: 'Tệp tham khảo đã tải lên',
   },
   'reference.files.name': {
@@ -202,7 +202,7 @@ const translations: Translations = {
     vi: 'Hành động',
   },
   'reference.files.noData': {
-    en: 'No reference files uploaded. Please upload Excel files to begin.',
+    en: 'No provider files uploaded. Please upload Excel files to begin.',
     vi: 'Không có tệp tham khảo nào được tải lên. Vui lòng tải lên tệp Excel để bắt đầu.',
   },
   // Common

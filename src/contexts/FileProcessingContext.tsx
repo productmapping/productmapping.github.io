@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from '@/components/ui/sonner';
 
@@ -208,7 +207,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
     };
     
     setReferenceFiles([...referenceFiles, newReferenceFile]);
-    toast.success(`Reference file "${file.name}" uploaded successfully`);
+    toast.success(`Provider file "${file.name}" uploaded successfully`);
   };
 
   const removeReferenceFile = (id: string) => {

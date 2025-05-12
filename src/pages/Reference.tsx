@@ -57,7 +57,7 @@ const Reference: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Reference Files List */}
+          {/* Provider Files List */}
           <Card className="high-tech-card">
             <CardHeader>
               <CardTitle>{t('reference.files.title')}</CardTitle>

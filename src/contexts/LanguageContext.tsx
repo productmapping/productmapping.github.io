@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 type Language = 'en' | 'vi';
@@ -25,6 +24,43 @@ const translations: Translations = {
   'nav.reference': {
     en: 'Reference Files',
     vi: 'Tệp tham khảo',
+  },
+  // Step-by-step guide
+  'guide.title': {
+    en: 'How It Works',
+    vi: 'Cách Thức Hoạt Động',
+  },
+  'guide.step1': {
+    en: 'Step 1',
+    vi: 'Bước 1',
+  },
+  'guide.step1.desc': {
+    en: 'Upload Provider (References) File',
+    vi: 'Tải lên tệp nhà cung cấp (Tham khảo)',
+  },
+  'guide.step2': {
+    en: 'Step 2',
+    vi: 'Bước 2',
+  },
+  'guide.step2.desc': {
+    en: 'Upload Your File',
+    vi: 'Tải lên tệp của bạn',
+  },
+  'guide.step3': {
+    en: 'Step 3',
+    vi: 'Bước 3',
+  },
+  'guide.step3.desc': {
+    en: 'Modify Product and Confirm',
+    vi: 'Chỉnh sửa sản phẩm và xác nhận',
+  },
+  'guide.step4': {
+    en: 'Step 4',
+    vi: 'Bước 4',
+  },
+  'guide.step4.desc': {
+    en: 'Download Result',
+    vi: 'Tải xuống kết quả',
   },
   // Home page
   'home.title': {
@@ -94,6 +130,10 @@ const translations: Translations = {
   'home.actions.download': {
     en: 'Download CSV',
     vi: 'Tải xuống CSV',
+  },
+  'home.actions.downloadResults': {
+    en: 'Download Analysis Results (CSV)',
+    vi: 'Tải xuống Kết quả Phân tích (CSV)',
   },
   // Analysis results
   'analysis.title': {
@@ -197,6 +237,10 @@ const translations: Translations = {
   'common.delete': {
     en: 'Delete',
     vi: 'Xóa',
+  },
+  'common.backToHome': {
+    en: 'Back to Home',
+    vi: 'Trở về Trang chủ',
   },
 };
 

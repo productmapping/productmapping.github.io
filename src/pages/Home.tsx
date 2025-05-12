@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFileProcessing } from '@/contexts/FileProcessingContext';
 import Layout from '@/components/Layout';
@@ -10,7 +9,8 @@ import {
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import { 
   Select, 
@@ -20,8 +20,9 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Check, Download, File, X } from 'lucide-react';
+import { Check, Download, File, X, FileUp, Edit, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 const Home: React.FC = () => {
   const { t } = useLanguage();
@@ -42,6 +43,15 @@ const Home: React.FC = () => {
   } = useFileProcessing();
   
   const [fileName, setFileName] = useState<string>('');
+  const uploadRef = useRef<HTMLDivElement>(null);
+  const extractRef = useRef<HTMLDivElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  
+  // Highlight states
+  const [highlightUpload, setHighlightUpload] = useState<boolean>(false);
+  const [highlightExtract, setHighlightExtract] = useState<boolean>(false);
+  const [highlightResult, setHighlightResult] = useState<boolean>(false);
   
   useEffect(() => {
     if (file) {
@@ -55,6 +65,44 @@ const Home: React.FC = () => {
     setSelectedSheet(value);
     // In a real app, we would re-extract products from the newly selected sheet
   };
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>, section?: 'upload' | 'extract' | 'result') => {
+    ref.current?.scrollIntoView({ behavior: 'smooth' });
+    
+    // Reset highlights
+    setHighlightUpload(false);
+    setHighlightExtract(false);
+    setHighlightResult(false);
+    
+    // Set highlight based on section
+    if (section === 'upload') {
+      setHighlightUpload(true);
+      // Auto-remove highlight after 3 seconds
+      setTimeout(() => {
+        setHighlightUpload(false);
+      }, 3000);
+    } else if (section === 'extract') {
+      setHighlightExtract(true);
+      // Auto-remove highlight after 3 seconds
+      setTimeout(() => {
+        setHighlightExtract(false);
+      }, 3000);
+    } else if (section === 'result') {
+      setHighlightResult(true);
+      // Auto-remove highlight after 3 seconds
+      setTimeout(() => {
+        setHighlightResult(false);
+      }, 3000);
+    }
+  };
+
+  const goToReferencePage = () => {
+    navigate('/reference');
+  };
+  
+  // Custom CSS for the gradient highlight effect
+  const highlightClass = "transition-all duration-1000 ease-in-out";
+  const activeHighlightClass = "shadow-[0_0_30px_10px_rgba(124,58,237,0.15),0_0_10px_4px_rgba(79,70,229,0.2)]";
   
   return (
     <Layout>
@@ -67,10 +115,79 @@ const Home: React.FC = () => {
             {t('home.subtitle')}
           </p>
         </div>
+
+        {/* Step-by-step guide section */}
+        <div className="bg-card rounded-xl shadow-lg p-6 border border-border/50">
+          <h2 className="text-xl font-semibold text-center mb-4">{t('guide.title')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Step 1 */}
+            <Card 
+              className="cursor-pointer hover:bg-accent/20 transition-colors" 
+              onClick={goToReferencePage}
+            >
+              <CardContent className="pt-6 flex flex-col items-center text-center gap-2">
+                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                  <FileUp className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-medium">{t('guide.step1')}</h3>
+                <p className="text-sm text-muted-foreground">{t('guide.step1.desc')}</p>
+                <ArrowRight className="h-5 w-5 mt-1 text-muted-foreground" />
+              </CardContent>
+            </Card>
+            
+            {/* Step 2 */}
+            <Card 
+              className="cursor-pointer hover:bg-accent/20 transition-colors" 
+              onClick={() => scrollToSection(uploadRef, 'upload')}
+            >
+              <CardContent className="pt-6 flex flex-col items-center text-center gap-2">
+                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                  <File className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-medium">{t('guide.step2')}</h3>
+                <p className="text-sm text-muted-foreground">{t('guide.step2.desc')}</p>
+                <ArrowRight className="h-5 w-5 mt-1 text-muted-foreground" />
+              </CardContent>
+            </Card>
+            
+            {/* Step 3 */}
+            <Card 
+              className="cursor-pointer hover:bg-accent/20 transition-colors" 
+              onClick={() => scrollToSection(extractRef, 'extract')}
+            >
+              <CardContent className="pt-6 flex flex-col items-center text-center gap-2">
+                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Edit className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-medium">{t('guide.step3')}</h3>
+                <p className="text-sm text-muted-foreground">{t('guide.step3.desc')}</p>
+                <ArrowRight className="h-5 w-5 mt-1 text-muted-foreground" />
+              </CardContent>
+            </Card>
+            
+            {/* Step 4 */}
+            <Card 
+              className="cursor-pointer hover:bg-accent/20 transition-colors" 
+              onClick={() => scrollToSection(resultRef, 'result')}
+            >
+              <CardContent className="pt-6 flex flex-col items-center text-center gap-2">
+                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Download className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-medium">{t('guide.step4')}</h3>
+                <p className="text-sm text-muted-foreground">{t('guide.step4.desc')}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" ref={uploadRef}>
           {/* Upload Card */}
-          <Card className="high-tech-card">
+          <Card className={cn(
+            "high-tech-card",
+            highlightClass,
+            highlightUpload && "animate-pulse-gentle"
+          )}>
             <CardHeader>
               <CardTitle>{t('home.upload.title')}</CardTitle>
               <CardDescription>{t('home.upload.supported')}</CardDescription>
@@ -124,7 +241,11 @@ const Home: React.FC = () => {
           </Card>
           
           {/* Extracted Products Card */}
-          <Card className="high-tech-card">
+          <Card className={cn(
+            "high-tech-card",
+            highlightClass,
+            highlightExtract && "animate-pulse-gentle"
+          )} ref={extractRef}>
             <CardHeader>
               <CardTitle>{t('home.extracted.title')}</CardTitle>
               <CardDescription>
@@ -175,22 +296,24 @@ const Home: React.FC = () => {
           "high-tech-card transition-all",
           analyzedProducts.length === 0
             ? "opacity-50"
-            : "opacity-100"
-        )}>
-          <CardHeader>
-            <CardTitle>{t('analysis.title')}</CardTitle>
-            <CardDescription>
-              {analyzedProducts.length 
-                ? `${analyzedProducts.length} products analyzed` 
-                : t('analysis.noData')
-              }
-            </CardDescription>
+            : "opacity-100",
+          highlightClass,
+          highlightResult && "animate-pulse-gentle"
+        )} ref={resultRef}>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>{t('analysis.title')}</CardTitle>
+              <CardDescription>
+                {analyzedProducts.length 
+                  ? `${analyzedProducts.length} products analyzed` 
+                  : t('analysis.noData')
+                }
+              </CardDescription>
+            </div>
             {analyzedProducts.length > 0 && (
               <Button
-                variant="outline"
-                size="sm"
-                className="absolute top-4 right-4"
                 onClick={downloadCsv}
+                className="bg-tech-blue hover:bg-tech-blue/90"
               >
                 <Download className="mr-2 h-4 w-4" />
                 {t('home.actions.download')}
@@ -203,6 +326,18 @@ const Home: React.FC = () => {
               isAnalyzedData={true}
             />
           </CardContent>
+          {analyzedProducts.length > 0 && (
+            <CardFooter className="flex justify-center pt-4 pb-6">
+              <Button 
+                onClick={downloadCsv}
+                className="bg-tech-blue hover:bg-tech-blue/90 px-6"
+                size="lg"
+              >
+                <Download className="mr-2 h-5 w-5" />
+                {t('home.actions.downloadResults')}
+              </Button>
+            </CardFooter>
+          )}
         </Card>
       </div>
     </Layout>

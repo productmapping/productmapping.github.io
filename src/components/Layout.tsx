@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Languages } from 'lucide-react';
+import { Languages, Menu, X } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,6 +12,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { t, language, setLanguage } = useLanguage();
   const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'vi' : 'en');
@@ -29,6 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <span className="text-lg font-bold gradient-text">AI Product Analyzer</span>
             </div>
             
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6">
               <Link 
                 to="/"
@@ -52,15 +54,50 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
             </nav>
             
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="text-muted-foreground hover:text-tech-purple"
-              onClick={toggleLanguage}
-            >
-              <Languages className="h-5 w-5 mr-1" />
-              <span>{language.toUpperCase()}</span>
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-muted-foreground hover:text-tech-purple"
+                onClick={toggleLanguage}
+              >
+                <Languages className="h-5 w-5 mr-1" />
+                <span>{language.toUpperCase()}</span>
+              </Button>
+              
+              {/* Mobile Navigation */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="md:hidden">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[250px] sm:w-[300px]">
+                  <nav className="flex flex-col space-y-4 mt-8">
+                    <Link 
+                      to="/"
+                      className={`font-medium text-lg transition-colors ${
+                        location.pathname === '/' 
+                          ? 'text-tech-blue' 
+                          : 'text-muted-foreground hover:text-tech-purple'
+                      }`}
+                    >
+                      {t('nav.home')}
+                    </Link>
+                    <Link 
+                      to="/reference"
+                      className={`font-medium text-lg transition-colors ${
+                        location.pathname === '/reference' 
+                          ? 'text-tech-blue' 
+                          : 'text-muted-foreground hover:text-tech-purple'
+                      }`}
+                    >
+                      {t('nav.reference')}
+                    </Link>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </header>

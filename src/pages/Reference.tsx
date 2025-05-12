@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFileProcessing } from '@/contexts/FileProcessingContext';
 import Layout from '@/components/Layout';
@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { File, Trash } from 'lucide-react';
+import { File, Trash, ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Reference: React.FC = () => {
@@ -23,7 +23,16 @@ const Reference: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-10">
-        <div className="text-center">
+        <div className="flex flex-col items-center">
+          <div className="w-full mb-4">
+            <Link to="/">
+              <Button variant="ghost" className="flex items-center text-muted-foreground hover:text-tech-purple">
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                {t('common.backToHome') || 'Back to Home'}
+              </Button>
+            </Link>
+          </div>
+          
           <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-4">
             {t('reference.title')}
           </h1>

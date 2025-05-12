@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Language } from 'lucide-react';
+import { Languages } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -58,7 +58,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className="text-muted-foreground hover:text-tech-purple"
               onClick={toggleLanguage}
             >
-              <Language className="h-5 w-5 mr-1" />
+              <Languages className="h-5 w-5 mr-1" />
               <span>{language.toUpperCase()}</span>
             </Button>
           </div>

@@ -108,7 +108,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       <footer className="bg-white border-t py-4">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} AI Product Analyzer
+          <div>
+            &copy; {new Date().getFullYear()} AI Product Analyzer - <span className="font-medium">Licensed to Strikingo</span>
+          </div>
+          <div className="mt-1">
+            All rights reserved. This project is licensed under Strikingo's proprietary license.
+          </div>
         </div>
       </footer>
     </div>

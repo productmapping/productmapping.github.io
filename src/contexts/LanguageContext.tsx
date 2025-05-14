@@ -83,6 +83,10 @@ const translations: Translations = {
     en: 'Drag and drop your file here or click to browse',
     vi: 'Kéo và thả tệp của bạn vào đây hoặc nhấp để duyệt',
   },
+  'home.upload.dragdropMultiple': {
+    en: 'Drop files here or click to browse',
+    vi: 'Kéo thả các tệp vào đây hoặc nhấp để duyệt',
+  },
   'home.upload.supported': {
     en: 'Supported formats: .xlsx, .xls',
     vi: 'Định dạng được hỗ trợ: .xlsx, .xls',
@@ -217,6 +221,30 @@ const translations: Translations = {
     en: 'Upload File',
     vi: 'Tải lên tệp',
   },
+  'reference.upload.files': {
+    en: 'Upload Excel Files',
+    vi: 'Tải lên các tệp Excel',
+  },
+  'reference.upload.folder': {
+    en: 'Upload Folder',
+    vi: 'Tải lên thư mục',
+  },
+  'reference.upload.folder.select': {
+    en: 'Select a folder',
+    vi: 'Chọn một thư mục',
+  },
+  'reference.upload.processing': {
+    en: 'Processing files',
+    vi: 'Đang xử lý tệp',
+  },
+  'reference.required': {
+    en: 'Provider files required',
+    vi: 'Yêu cầu tệp nhà cung cấp',
+  },
+  'reference.goToUpload': {
+    en: 'Upload Now',
+    vi: 'Tải lên ngay',
+  },
   'reference.files.title': {
     en: 'Uploaded Provider Files',
     vi: 'Tệp tham khảo đã tải lên',
@@ -273,6 +301,10 @@ const translations: Translations = {
   'common.backToHome': {
     en: 'Back to Home',
     vi: 'Trở về Trang chủ',
+  },
+  'common.continueToNextStep': {
+    en: 'Continue to Next Step',
+    vi: 'Tiếp tục đến bước tiếp theo',
   },
   'common.itemsPerPage': {
     en: 'Items per page',

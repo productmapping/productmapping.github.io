@@ -3,8 +3,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useFileProcessing } from '@/contexts/FileProcessingContext';
 import Layout from '@/components/Layout';
 import FileUploader from '@/components/FileUploader';
+import ExcelFolderUploader from '@/components/ExcelFolderUploader'; // Import the new component
 import ProductTable from '@/components/ProductTable';
 import { Progress } from '@/components/ui/progress';
+import { toast } from '@/components/ui/sonner';
 import { 
   Card, 
   CardContent, 
@@ -21,9 +23,11 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Check, Download, File, X, FileUp, Edit, ArrowRight, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Check, Download, File, X, FileUp, Edit, ArrowRight, Loader2, Trash, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 
 const Home: React.FC = () => {
   const { t } = useLanguage();
@@ -42,15 +46,22 @@ const Home: React.FC = () => {
     deleteProduct,
     analyzeProducts,
     downloadCsv,
+    referenceFiles, 
+    addReferenceFile, 
+    removeReferenceFile,
+    uploadFolderFiles
   } = useFileProcessing();
   
   const [fileName, setFileName] = useState<string>('');
+  const [activeStep, setActiveStep] = useState<string>('step1');
+  
+  const step1Ref = useRef<HTMLDivElement>(null);
   const uploadRef = useRef<HTMLDivElement>(null);
   const extractRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   
   // Highlight states
+  const [highlightStep1, setHighlightStep1] = useState<boolean>(false);
   const [highlightUpload, setHighlightUpload] = useState<boolean>(false);
   const [highlightExtract, setHighlightExtract] = useState<boolean>(false);
   const [highlightResult, setHighlightResult] = useState<boolean>(false);
@@ -75,29 +86,40 @@ const Home: React.FC = () => {
     setSelectedSheet(value);
   };
 
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>, section?: 'upload' | 'extract' | 'result') => {
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>, section?: 'step1' | 'upload' | 'extract' | 'result') => {
     ref.current?.scrollIntoView({ behavior: 'smooth' });
     
     // Reset highlights
+    setHighlightStep1(false);
     setHighlightUpload(false);
     setHighlightExtract(false);
     setHighlightResult(false);
     
     // Set highlight based on section
-    if (section === 'upload') {
+    if (section === 'step1') {
+      setHighlightStep1(true);
+      setActiveStep('step1');
+      // Auto-remove highlight after 3 seconds
+      setTimeout(() => {
+        setHighlightStep1(false);
+      }, 3000);
+    } else if (section === 'upload') {
       setHighlightUpload(true);
+      setActiveStep('step2');
       // Auto-remove highlight after 3 seconds
       setTimeout(() => {
         setHighlightUpload(false);
       }, 3000);
     } else if (section === 'extract') {
       setHighlightExtract(true);
+      setActiveStep('step3');
       // Auto-remove highlight after 3 seconds
       setTimeout(() => {
         setHighlightExtract(false);
       }, 3000);
     } else if (section === 'result') {
       setHighlightResult(true);
+      setActiveStep('step4');
       // Auto-remove highlight after 3 seconds
       setTimeout(() => {
         setHighlightResult(false);
@@ -113,10 +135,25 @@ const Home: React.FC = () => {
     await analyzeProducts();
   };
 
-  const goToReferencePage = () => {
-    navigate('/reference');
+  const handleStepClick = (step: string) => {
+    switch (step) {
+      case 'step1':
+        scrollToSection(step1Ref, 'step1');
+        break;
+      case 'step2':
+        scrollToSection(uploadRef, 'upload');
+        break;
+      case 'step3':
+        scrollToSection(extractRef, 'extract');
+        break;
+      case 'step4':
+        scrollToSection(resultRef, 'result');
+        break;
+      default:
+        break;
+    }
   };
-  
+
   // Custom CSS for the gradient highlight effect
   const highlightClass = "transition-all duration-1000 ease-in-out";
   const activeHighlightClass = "shadow-[0_0_30px_10px_rgba(124,58,237,0.15),0_0_10px_4px_rgba(79,70,229,0.2)]";
@@ -139,8 +176,11 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Step 1 */}
             <Card 
-              className="cursor-pointer hover:bg-accent/20 transition-colors" 
-              onClick={goToReferencePage}
+              className={cn(
+                "cursor-pointer transition-colors",
+                activeStep === 'step1' ? "bg-accent/30" : "hover:bg-accent/20"
+              )}
+              onClick={() => handleStepClick('step1')}
             >
               <CardContent className="pt-6 flex flex-col items-center text-center gap-2">
                 <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -154,8 +194,11 @@ const Home: React.FC = () => {
             
             {/* Step 2 */}
             <Card 
-              className="cursor-pointer hover:bg-accent/20 transition-colors" 
-              onClick={() => scrollToSection(uploadRef, 'upload')}
+              className={cn(
+                "cursor-pointer transition-colors",
+                activeStep === 'step2' ? "bg-accent/30" : "hover:bg-accent/20"
+              )}
+              onClick={() => handleStepClick('step2')}
             >
               <CardContent className="pt-6 flex flex-col items-center text-center gap-2">
                 <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -169,8 +212,11 @@ const Home: React.FC = () => {
             
             {/* Step 3 */}
             <Card 
-              className="cursor-pointer hover:bg-accent/20 transition-colors" 
-              onClick={() => scrollToSection(extractRef, 'extract')}
+              className={cn(
+                "cursor-pointer transition-colors",
+                activeStep === 'step3' ? "bg-accent/30" : "hover:bg-accent/20"
+              )}
+              onClick={() => handleStepClick('step3')}
             >
               <CardContent className="pt-6 flex flex-col items-center text-center gap-2">
                 <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -184,8 +230,11 @@ const Home: React.FC = () => {
             
             {/* Step 4 */}
             <Card 
-              className="cursor-pointer hover:bg-accent/20 transition-colors" 
-              onClick={() => scrollToSection(resultRef, 'result')}
+              className={cn(
+                "cursor-pointer transition-colors",
+                activeStep === 'step4' ? "bg-accent/30" : "hover:bg-accent/20"
+              )}
+              onClick={() => handleStepClick('step4')}
             >
               <CardContent className="pt-6 flex flex-col items-center text-center gap-2">
                 <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -198,6 +247,103 @@ const Home: React.FC = () => {
           </div>
         </div>
         
+        {/* Step 1: Reference Files (Integrated from Reference page) */}
+        <div className="grid grid-cols-1 gap-6" ref={step1Ref}>
+          <Card className={cn(
+            "high-tech-card",
+            highlightClass,
+            highlightStep1 && "animate-pulse-gentle"
+          )}>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>{t('reference.title')}</CardTitle>
+                <CardDescription>{t('reference.subtitle')}</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Upload Section */}
+              <div className="space-y-4">
+                {/* Replace the old FileUploader with our new ExcelFolderUploader */}
+                <ExcelFolderUploader className="w-full" />
+                <p className="text-sm text-muted-foreground text-center">
+                  {t('home.upload.supported')}
+                </p>
+              </div>
+              
+              {/* Files Table */}
+              <div>
+                <div className="flex flex-row items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">{t('reference.files.title')}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {referenceFiles.length 
+                      ? `${referenceFiles.length} files uploaded` 
+                      : t('reference.files.noData')
+                    }
+                  </p>
+                </div>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t('reference.files.name')}</TableHead>
+                        <TableHead>{t('reference.files.date')}</TableHead>
+                        <TableHead className="text-right">{t('reference.files.actions')}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {referenceFiles.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={3} className="h-24 text-center">
+                            {t('reference.files.noData')}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        referenceFiles.map((file) => (
+                          <TableRow key={file.id}>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center">
+                                <File className="h-4 w-4 mr-2" />
+                                {file.name}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {format(file.dateUploaded, 'PPP')}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => removeReferenceFile(file.id)}
+                              >
+                                <Trash className="h-4 w-4 mr-1" />
+                                {t('common.delete')}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+              
+              {referenceFiles.length > 0 && (
+                <div className="mt-6 flex justify-center">
+                  <Button 
+                    onClick={() => scrollToSection(uploadRef, 'upload')}
+                    className="bg-tech-blue hover:bg-tech-blue/90"
+                  >
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                    {t('common.continueToNextStep')}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Step 2: Upload */}
         <div className="grid grid-cols-1 md:grid-cols-10 gap-6" ref={uploadRef}>
           {/* Upload Card */}
           <Card className={cn(
@@ -244,8 +390,9 @@ const Home: React.FC = () => {
                   </div>
                 ) : (
                   <FileUploader
-                    onFileSelected={setFile}
+                    onFileSelected={(files) => setFile(files[0])} // Only pass the first file
                     className="w-full"
+                    multiple={false} // Set to false to only allow single file selection
                   />
                 ))}
                 
@@ -270,7 +417,7 @@ const Home: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Extracted Products Card */}
+          {/* Step 3: Extracted Products Card */}
           <Card className={cn(
             "high-tech-card md:col-span-7",
             highlightClass,
@@ -290,7 +437,7 @@ const Home: React.FC = () => {
               {/* Confirm & Analyze button in the header */}
               {extractedProducts.length > 0 && (
                 <Button 
-                  disabled={isAnalyzing || extractedProducts.length === 0}
+                  disabled={isAnalyzing || extractedProducts.length === 0 || referenceFiles.length === 0}
                   onClick={handleAnalyzeClick}
                   className="bg-tech-blue hover:bg-tech-blue/90"
                 >
@@ -307,6 +454,20 @@ const Home: React.FC = () => {
                   )}
                 </Button>
               )}
+              
+              {extractedProducts.length > 0 && referenceFiles.length === 0 && (
+                <div className="text-sm text-amber-500 flex items-center">
+                  <span>{t('reference.required')}</span>
+                  <Button 
+                    variant="link" 
+                    size="sm"
+                    className="px-1 text-amber-500"
+                    onClick={() => scrollToSection(step1Ref, 'step1')}
+                  >
+                    {t('reference.goToUpload')}
+                  </Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -322,7 +483,7 @@ const Home: React.FC = () => {
           </Card>
         </div>
         
-        {/* Analysis Results Card */}
+        {/* Step 4: Analysis Results Card */}
         <Card className={cn(
           "high-tech-card transition-all",
           analyzedProducts.length === 0

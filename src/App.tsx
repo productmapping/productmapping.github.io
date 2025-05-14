@@ -7,7 +7,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { FileProcessingProvider } from "@/contexts/FileProcessingContext";
 
 import Home from "./pages/Home";
-import Reference from "./pages/Reference";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,7 +21,6 @@ const App = () => (
           <HashRouter>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/reference" element={<Reference />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </HashRouter>

@@ -42,16 +42,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 {t('nav.home')}
               </Link>
-              <Link 
-                to="/reference"
-                className={`font-medium transition-colors ${
-                  location.pathname === '/reference' 
-                    ? 'text-tech-blue' 
-                    : 'text-muted-foreground hover:text-tech-purple'
-                }`}
-              >
-                {t('nav.reference')}
-              </Link>
             </nav>
             
             <div className="flex items-center space-x-2">
@@ -83,16 +73,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       }`}
                     >
                       {t('nav.home')}
-                    </Link>
-                    <Link 
-                      to="/reference"
-                      className={`font-medium text-lg transition-colors ${
-                        location.pathname === '/reference' 
-                          ? 'text-tech-blue' 
-                          : 'text-muted-foreground hover:text-tech-purple'
-                      }`}
-                    >
-                      {t('nav.reference')}
                     </Link>
                   </nav>
                 </SheetContent>

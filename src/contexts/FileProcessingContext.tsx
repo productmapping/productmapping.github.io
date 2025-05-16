@@ -89,6 +89,8 @@ interface FileProcessingContextType {
   loadingProgress: number;
   isProcessingFolder: boolean;
   folderProcessingProgress: number;
+  analyzeProgress: number; // Added for analysis progress tracking
+  estimatedAnalyzeTime: number; // Added for estimated time remaining
   providerPricingData: ProviderPricingResponse | null;
   
   setFile: (file: File | null) => void;
@@ -171,6 +173,8 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   const [isProcessingFolder, setIsProcessingFolder] = useState<boolean>(false);
   const [folderProcessingProgress, setFolderProcessingProgress] = useState<number>(0);
+  const [analyzeProgress, setAnalyzeProgress] = useState<number>(0); // Added for analysis progress tracking
+  const [estimatedAnalyzeTime, setEstimatedAnalyzeTime] = useState<number>(0); // Added for estimated time remaining
   const [providerPricingData, setProviderPricingData] = useState<ProviderPricingResponse | null>(null);
   
   // Store the full API response to access different sheets
@@ -222,7 +226,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       formData.append('file', file);
       
       // Make API call to extract data from Excel
-      const response = await fetch('https://batgroup.strikingo.com/bid/extract_items_from_excel', {
+      const response = await fetch('http://localhost:8000/bid/extract_items_from_excel', {
         method: 'POST',
         body: formData,
       });
@@ -288,6 +292,13 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
     }
 
     try {
+      // CRITICAL DEBUGGING: Log exact state of providerPricingData
+      console.log('============ PROVIDER PRICING DEBUG START ============');
+      console.log('providerPricingData type:', typeof providerPricingData);
+      console.log('providerPricingData is array?', Array.isArray(providerPricingData));
+      console.log('providerPricingData stringified:', JSON.stringify(providerPricingData));
+      console.log('============ PROVIDER PRICING DEBUG END ============');
+
       // Prepare the request payload
       const requestPayload: MapItemsRequest = {
         item_list: extractedProducts.map(product => ({
@@ -305,36 +316,31 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         provider_pricing_detail_list: []
       };
 
-      // If we have provider pricing data, use it
-      if (providerPricingData && providerPricingData.data) {
-        // Since the API response structure might be different, 
-        // we'll need to adapt the data transformation here
-        // This is a placeholder transformation that should be adjusted
-        // based on the actual structure of providerPricingData
-        Object.entries(providerPricingData.data.mappedProducts).forEach(([key, value]) => {
-          if (value && typeof value === 'object' && 'items' in value && Array.isArray(value.items)) {
-            requestPayload.provider_pricing_detail_list.push({
-              sheet_name: key,
-              provider_pricing: {
-                items: value.items.map((item: any) => ({
-                  item_name: item.item_name || '',
-                  item_specification: item.item_specification || null,
-                  total_amount: item.total_amount || 0,
-                  unit_price: item.unit_price || 0,
-                  qty_items: item.qty_items || 0,
-                  brand: item.brand || '',
-                  origin: item.origin || ''
-                })),
-                provider_name: value.provider_name || 'Unknown Provider'
-              },
-              file_name: value.file_name || 'unknown.xlsx'
-            });
-          }
-        });
+      // Handle the provider pricing data based on its actual structure
+      if (Array.isArray(providerPricingData)) {
+        // If providerPricingData is already an array with the correct format, use it directly
+        console.log('Provider pricing data is an array, using it directly');
+        requestPayload.provider_pricing_detail_list = providerPricingData;
+      } else if (providerPricingData && typeof providerPricingData === 'object') {
+        // If it's an object, need to check its structure
+        if (providerPricingData.formattedProviderPricing && Array.isArray(providerPricingData.formattedProviderPricing)) {
+          console.log('Using formattedProviderPricing array');
+          requestPayload.provider_pricing_detail_list = providerPricingData.formattedProviderPricing;
+        } else if (providerPricingData.data && Array.isArray(providerPricingData.data)) {
+          console.log('Using data array property');
+          requestPayload.provider_pricing_detail_list = providerPricingData.data;
+        } else {
+          console.log('Could not find appropriate data structure in providerPricingData');
+        }
       }
 
+      // Log what we're sending to the API
+      console.log('Final request payload provider_pricing_detail_list count:', requestPayload.provider_pricing_detail_list.length);
+      console.log('First item in provider_pricing_detail_list:', requestPayload.provider_pricing_detail_list.length > 0 ? 
+                  JSON.stringify(requestPayload.provider_pricing_detail_list[0]) : 'None');
+      
       // Make API call to map items to provider pricing
-      const response = await fetch('https://batgroup.strikingo.com/bid/map_items_to_provider_pricing_json', {
+      const response = await fetch('http://localhost:8000/bid/map_items_to_provider_pricing_json', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -343,11 +349,23 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         body: JSON.stringify(requestPayload)
       });
 
+      // Log the raw response from the server
+      const rawResponse = await response.text();
+      console.log('Raw API response:', rawResponse);
+      
+      let data;
+      try {
+        data = JSON.parse(rawResponse);
+        console.log('Parsed API response:', data);
+      } catch (parseError) {
+        console.error('Failed to parse API response:', parseError);
+        throw new Error('Failed to parse server response');
+      }
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
       return data;
     } catch (error) {
       console.error('Error mapping items to provider pricing:', error);
@@ -368,14 +386,35 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
     }
     
     setIsAnalyzing(true);
+    setAnalyzeProgress(0);
+    setEstimatedAnalyzeTime(extractedProducts.length * 5); // Estimate 5 seconds per product
     
     try {
+      // Start a timer to update the progress continuously
+      const startTime = Date.now();
+      const totalEstimatedTime = extractedProducts.length * 5 * 1000; // 5 seconds per product in ms
+      
+      // Set up interval to update progress every 100ms for smooth animation
+      const progressInterval = setInterval(() => {
+        if (isMounted.current && isAnalyzing) {
+          const elapsedTime = Date.now() - startTime;
+          // Calculate progress based on elapsed time vs total estimated time
+          const estimatedProgress = Math.min((elapsedTime / totalEstimatedTime) * 100, 99);
+          setAnalyzeProgress(estimatedProgress);
+        }
+      }, 100);
+      
       // Call the map_items_to_provider_pricing_json API
       const mappingResult = await mapItemsToProviderPricing();
+      
+      clearInterval(progressInterval);
       
       if (!mappingResult) {
         throw new Error('Failed to analyze products');
       }
+      
+      // Set progress to 100% when complete
+      setAnalyzeProgress(100);
       
       // Transform the API response into analyzed products
       const results: AnalyzedProduct[] = extractedProducts.map(product => {
@@ -392,17 +431,20 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
             origin: matchedProduct.origin || 'Unknown',
             type: matchedProduct.type || 'Unknown'
           };
+        } else {
+          // If no match is found, return the product with default values
+          return {
+            ...product,
+            price: 'N/A',
+            provider: 'Not Found',
+            origin: 'Unknown',
+            type: 'Unknown'
+          };
         }
-        
-        // If no match is found, return the product with default values
-        return {
-          ...product,
-          price: 'N/A',
-          provider: 'Not Found',
-          origin: 'Unknown',
-          type: 'Unknown'
-        };
       });
+      
+      // Short delay to show 100% progress before completing
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       setAnalyzedProducts(results);
       toast.success('Analysis completed successfully');
@@ -505,7 +547,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }, 500);
       
       // Make API call to process the files
-      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder_json', {
+      const response = await fetch('http://localhost:8000/provider/extract_provider_pricing_from_excel_folder_json', {
         method: 'POST',
         body: formData,
       });
@@ -516,13 +558,94 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
       
-      const data: ProviderPricingResponse = await response.json();
-      setProviderPricingData(data);
+      const rawData = await response.text(); // Get raw response text
+      console.log('Raw API response:', rawData);
+      
+      let data;
+      try {
+        data = JSON.parse(rawData);
+        console.log('Parsed API response:', data);
+      } catch (parseError) {
+        console.error('Failed to parse API response as JSON:', parseError);
+        throw new Error('Failed to parse server response');
+      }
+      
+      // DEBUGGING: Inspect the response structure in detail
+      console.log('API success status:', data.success);
+      console.log('API message:', data.message);
+      console.log('API data type:', typeof data.data);
+      console.log('API data structure:', JSON.stringify(data.data, null, 2));
+      
+      // Direct conversion to the correct format
+      let providerData;
+      
+      // Handle the data structure based on content
+      if (Array.isArray(data)) {
+        console.log('Response is direct array format');
+        providerData = data;
+      } else if (data && Array.isArray(data.data)) {
+        console.log('Response has data array property');
+        providerData = data;
+      } else if (data && typeof data.data === 'object' && data.data !== null) {
+        console.log('Response has data object property');
+        
+        // The example you provided earlier had this structure - prepare it here
+        const formattedData = [];
+        
+        if (data.data.mappedProducts && typeof data.data.mappedProducts === 'object') {
+          Object.entries(data.data.mappedProducts).forEach(([sheetName, value]) => {
+            if (value && typeof value === 'object') {
+              // If it's already in the correct format
+              if (value.provider_pricing && Array.isArray(value.provider_pricing.items)) {
+                formattedData.push({
+                  sheet_name: sheetName,
+                  provider_pricing: value.provider_pricing,
+                  file_name: value.file_name || sheetName
+                });
+              } 
+              // If items are directly in the value
+              else if (Array.isArray(value.items)) {
+                formattedData.push({
+                  sheet_name: sheetName,
+                  provider_pricing: {
+                    items: value.items,
+                    provider_name: value.provider_name || 'Unknown Provider'
+                  },
+                  file_name: value.file_name || sheetName
+                });
+              }
+              // If value itself is an array
+              else if (Array.isArray(value)) {
+                formattedData.push({
+                  sheet_name: sheetName,
+                  provider_pricing: {
+                    items: value,
+                    provider_name: 'Unknown Provider'
+                  },
+                  file_name: sheetName
+                });
+              }
+            }
+          });
+        }
+        
+        // Override the data structure with our correctly formatted one
+        data.formattedProviderPricing = formattedData;
+        providerData = data;
+        
+        console.log('Converted to formatter array structure:', formattedData.length, 'sheets');
+      } else {
+        console.log('Unknown response structure');
+        providerData = { data: [], success: false, message: 'Failed to parse data structure' };
+      }
+      
+      // Set the provider pricing data with the formatted structure
+      setProviderPricingData(providerData);
       setFolderProcessingProgress(100);
       
       toast.success('Files processed successfully');
       
-      return data;
+      return providerData;
     } catch (error) {
       console.error('Error processing files:', error);
       toast.error('Error processing files. Please try again.');
@@ -593,7 +716,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }, updateInterval);
       
       // Make API call to process the folder
-      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder_json', {
+      const response = await fetch('http://localhost:8000/provider/extract_provider_pricing_from_excel_folder_json', {
         method: 'POST',
         body: formData,
       });
@@ -642,6 +765,8 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         loadingProgress,
         isProcessingFolder,
         folderProcessingProgress,
+        analyzeProgress,
+        estimatedAnalyzeTime,
         providerPricingData,
         setFile: (file) => {
           setFile(file);

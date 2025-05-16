@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useFileProcessing } from '@/contexts/FileProcessingContext';
 import Layout from '@/components/Layout';
 import FileUploader from '@/components/FileUploader';
-import ExcelFolderUploader from '@/components/ExcelFolderUploader'; // Import the new component
+import ExcelFolderUploader from '@/components/ExcelFolderUploader';
 import ProductTable from '@/components/ProductTable';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/components/ui/sonner';
@@ -40,6 +40,8 @@ const Home: React.FC = () => {
     isLoading,
     isAnalyzing,
     loadingProgress,
+    analyzeProgress,
+    estimatedAnalyzeTime,
     setFile,
     setSelectedSheet,
     updateProduct,
@@ -54,6 +56,10 @@ const Home: React.FC = () => {
   
   const [fileName, setFileName] = useState<string>('');
   const [activeStep, setActiveStep] = useState<string>('step1');
+  const [remainingTime, setRemainingTime] = useState<number>(0);
+  
+  // Add reference to track analysis start time
+  const analysisStartTimeRef = useRef<number>(0);
   
   const step1Ref = useRef<HTMLDivElement>(null);
   const uploadRef = useRef<HTMLDivElement>(null);
@@ -82,6 +88,34 @@ const Home: React.FC = () => {
     }
   }, [isAnalyzing, analyzedProducts.length]);
   
+  // Effect to handle the countdown timer for analysis
+  useEffect(() => {
+    let timerId: number | undefined;
+    
+    if (isAnalyzing) {
+      // Set the initial start time when analysis begins
+      if (analysisStartTimeRef.current === 0) {
+        analysisStartTimeRef.current = Date.now();
+        setRemainingTime(extractedProducts.length * 5); // Initial estimate: 5 seconds per product
+      }
+      
+      // Update the countdown every second
+      timerId = window.setInterval(() => {
+        const elapsedSeconds = Math.floor((Date.now() - analysisStartTimeRef.current) / 1000);
+        const totalEstimatedSeconds = extractedProducts.length * 5;
+        const remaining = Math.max(0, totalEstimatedSeconds - elapsedSeconds);
+        setRemainingTime(remaining);
+      }, 1000);
+    } else {
+      // Reset when analysis is complete
+      analysisStartTimeRef.current = 0;
+    }
+    
+    return () => {
+      if (timerId) window.clearInterval(timerId);
+    };
+  }, [isAnalyzing, extractedProducts.length]);
+
   const handleSheetChange = (value: string) => {
     setSelectedSheet(value);
   };
@@ -129,6 +163,8 @@ const Home: React.FC = () => {
 
   // Wrap the original analyzeProducts function to handle additional UI logic
   const handleAnalyzeClick = async () => {
+    // Reset the analysis start time
+    analysisStartTimeRef.current = 0;
     // Scroll to results section immediately after clicking
     scrollToSection(resultRef, 'result');
     // Start the analysis process
@@ -471,6 +507,23 @@ const Home: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                {/* Analysis progress bar when analyzing - Moved here from results section */}
+                {isAnalyzing && (
+                  <div className="mb-6 space-y-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">Analyzing products</span>
+                      <span className="text-sm font-medium">{Math.round(analyzeProgress)}%</span>
+                    </div>
+                    <Progress value={analyzeProgress} className="h-2" />
+                    <div className="flex justify-between items-center text-sm text-muted-foreground mt-2">
+                      <span>Processing {extractedProducts.length} products (~5s per product)</span>
+                      <span>
+                        Estimated time remaining: {remainingTime} seconds
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="rounded-lg">
                   <ProductTable
                     products={extractedProducts}

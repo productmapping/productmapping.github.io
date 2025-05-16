@@ -85,7 +85,7 @@ const translations: Translations = {
   },
   'home.upload.dragdropMultiple': {
     en: 'Drop files here or click to browse',
-    vi: 'Kéo thả các tệp vào đây hoặc nhấp để duyệt',
+    vi: 'Kéo thả các tệp Excel vào đây hoặc nhấp để duyệt',
   },
   'home.upload.supported': {
     en: 'Supported formats: .xlsx, .xls',
@@ -204,6 +204,18 @@ const translations: Translations = {
     en: 'No analysis results. Please confirm and analyze products first.',
     vi: 'Không có kết quả phân tích. Vui lòng xác nhận và phân tích sản phẩm trước.',
   },
+  'analysis.processingProducts': {
+    en: 'Analyzing products',
+    vi: 'Đang phân tích sản phẩm',
+  },
+  'analysis.productCount': {
+    en: 'Processing {count} products (~5s per product)',
+    vi: 'Đang xử lý {count} sản phẩm (~5 giây mỗi sản phẩm)',
+  },
+  'analysis.timeRemaining': {
+    en: 'Estimated time remaining: {time} seconds',
+    vi: 'Thời gian ước tính còn lại: {time} giây',
+  },
   // Reference page
   'reference.title': {
     en: 'Provider Files',
@@ -226,6 +238,10 @@ const translations: Translations = {
     vi: 'Tải lên các tệp Excel',
   },
   'reference.upload.folder': {
+    en: 'Upload Folder',
+    vi: 'Tải lên thư mục',
+  },
+  'reference.uploadFolder': {
     en: 'Upload Folder',
     vi: 'Tải lên thư mục',
   },
@@ -264,6 +280,10 @@ const translations: Translations = {
   'reference.files.noData': {
     en: 'No provider files uploaded. Please upload Excel files to begin.',
     vi: 'Không có tệp tham khảo nào được tải lên. Vui lòng tải lên tệp Excel để bắt đầu.',
+  },
+  'reference.filesUploaded': {
+    en: '{count} files uploaded',
+    vi: '{count} tệp đã được tải lên',
   },
   // Common
   'common.loading': {
@@ -339,7 +359,7 @@ const translations: Translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('vi');
 
   const t = (key: string): string => {
     if (!translations[key]) {

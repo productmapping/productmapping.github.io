@@ -47,7 +47,6 @@ const Home: React.FC = () => {
     updateProduct,
     deleteProduct,
     analyzeProducts,
-    downloadCsv,
     referenceFiles, 
     addReferenceFile, 
     removeReferenceFile,
@@ -71,6 +70,9 @@ const Home: React.FC = () => {
   const [highlightUpload, setHighlightUpload] = useState<boolean>(false);
   const [highlightExtract, setHighlightExtract] = useState<boolean>(false);
   const [highlightResult, setHighlightResult] = useState<boolean>(false);
+  
+  // State to store the csv_url from the API response
+  const [csvUrl, setCsvUrl] = useState<string | null>(null);
   
   useEffect(() => {
     if (file) {
@@ -168,7 +170,35 @@ const Home: React.FC = () => {
     // Scroll to results section immediately after clicking
     scrollToSection(resultRef, 'result');
     // Start the analysis process
-    await analyzeProducts();
+    const result = await analyzeProducts();
+    
+    // Store the CSV URL if it's available in the response
+    if (result && result.csv_url) {
+      setCsvUrl(result.csv_url);
+    }
+  };
+
+  // Custom function to handle CSV download
+  const handleDownloadCsv = () => {
+    if (csvUrl) {
+      // Download from API URL
+      const downloadUrl = `http://localhost:8000${csvUrl}`;
+      console.log('Attempting to download CSV from URL:', downloadUrl);
+      
+      // Create a hidden link and trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.target = '_blank';
+      link.download = `product_analysis_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Starting CSV download...');
+    } else {
+      console.error('CSV URL is not available');
+      toast.error('CSV URL not available. Please try analyzing the data again.');
+    }
   };
 
   const handleStepClick = (step: string) => {
@@ -295,6 +325,28 @@ const Home: React.FC = () => {
                 <CardTitle>{t('reference.title')}</CardTitle>
                 <CardDescription>{t('reference.subtitle')}</CardDescription>
               </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  // Use the global reference we created
+                  if (window.folderUploadInput) {
+                    window.folderUploadInput.click();
+                  } else {
+                    // Fallback to direct DOM method
+                    const folderInput = document.getElementById('folder-upload-input');
+                    if (folderInput) {
+                      folderInput.click();
+                    } else {
+                      toast.error('Folder upload not available');
+                    }
+                  }
+                }}
+                className="flex items-center gap-1"
+              >
+                <Upload className="h-4 w-4" />
+                {t('reference.uploadFolder') || 'Upload Folder'}
+              </Button>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Upload Section */}
@@ -463,9 +515,9 @@ const Home: React.FC = () => {
               <div>
                 <CardTitle>{t('home.extracted.title')}</CardTitle>
                 <CardDescription>
-                  {extractedProducts.length 
-                    ? `${extractedProducts.length} products extracted` 
-                    : t('home.extracted.noData')
+                  {referenceFiles.length 
+                    ? t('reference.filesUploaded').replace('{count}', referenceFiles.length.toString()) 
+                    : t('reference.files.noData')
                   }
                 </CardDescription>
               </div>
@@ -511,14 +563,16 @@ const Home: React.FC = () => {
                 {isAnalyzing && (
                   <div className="mb-6 space-y-2">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">Analyzing products</span>
+                      <span className="text-sm font-medium">{t('analysis.processingProducts')}</span>
                       <span className="text-sm font-medium">{Math.round(analyzeProgress)}%</span>
                     </div>
                     <Progress value={analyzeProgress} className="h-2" />
                     <div className="flex justify-between items-center text-sm text-muted-foreground mt-2">
-                      <span>Processing {extractedProducts.length} products (~5s per product)</span>
                       <span>
-                        Estimated time remaining: {remainingTime} seconds
+                        {t('analysis.productCount').replace('{count}', extractedProducts.length.toString())}
+                      </span>
+                      <span>
+                        {t('analysis.timeRemaining').replace('{time}', remainingTime.toString())}
                       </span>
                     </div>
                   </div>
@@ -557,7 +611,7 @@ const Home: React.FC = () => {
             </div>
             {analyzedProducts.length > 0 && (
               <Button
-                onClick={downloadCsv}
+                onClick={handleDownloadCsv}
                 className="bg-tech-blue hover:bg-tech-blue/90"
               >
                 <Download className="mr-2 h-4 w-4" />
@@ -573,18 +627,6 @@ const Home: React.FC = () => {
               />
             </div>
           </CardContent>
-          {analyzedProducts.length > 0 && (
-            <CardFooter className="flex justify-center pt-4 pb-6">
-              <Button 
-                onClick={downloadCsv}
-                className="bg-tech-blue hover:bg-tech-blue/90 px-6"
-                size="lg"
-              >
-                <Download className="mr-2 h-5 w-5" />
-                {t('home.actions.downloadResults')}
-              </Button>
-            </CardFooter>
-          )}
         </Card>
       </div>
     </Layout>

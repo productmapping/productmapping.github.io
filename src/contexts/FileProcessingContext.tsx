@@ -77,6 +77,13 @@ export interface MapItemsRequest {
   }[];
 }
 
+// Add csv_url to the type definition
+interface MappingResult {
+  items: any[];
+  csv_url?: string; // Add the CSV URL property
+  [key: string]: any;
+}
+
 interface FileProcessingContextType {
   file: File | null;
   sheetNames: string[];
@@ -99,7 +106,7 @@ interface FileProcessingContextType {
   setExtractedProducts: (products: Product[]) => void;
   updateProduct: (index: number, product: Product) => void;
   deleteProduct: (index: number) => void;
-  analyzeProducts: () => Promise<void>;
+  analyzeProducts: () => Promise<MappingResult | null>;
   downloadCsv: () => void;
   addReferenceFile: (files: File | File[]) => void;
   removeReferenceFile: (id: string) => void;
@@ -226,7 +233,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       formData.append('file', file);
       
       // Make API call to extract data from Excel
-      const response = await fetch('https://batgroup.strikingo.com/bid/extract_items_from_excel', {
+      const response = await fetch('http://localhost:8000/bid/extract_items_from_excel', {
         method: 'POST',
         body: formData,
       });
@@ -285,7 +292,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
   };
 
   // New function to map items to provider pricing
-  const mapItemsToProviderPricing = async () => {
+  const mapItemsToProviderPricing = async (): Promise<MappingResult | null> => {
     if (!providerPricingData) {
       toast.error('No provider pricing data available. Please upload provider files first.');
       return null;
@@ -340,7 +347,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
                   JSON.stringify(requestPayload.provider_pricing_detail_list[0]) : 'None');
       
       // Make API call to map items to provider pricing
-      const response = await fetch('https://batgroup.strikingo.com/bid/map_items_to_provider_pricing_json', {
+      const response = await fetch('http://localhost:8000/bid/map_items_to_provider_pricing_json', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -374,15 +381,15 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
     }
   };
   
-  const analyzeProductsWithAPI = async () => {
+  const analyzeProductsWithAPI = async (): Promise<MappingResult | null> => {
     if (extractedProducts.length === 0) {
       toast.error('Please upload product data before analyzing');
-      return;
+      return null;
     }
     
     if (!providerPricingData) {
       toast.error('Please upload provider files before analyzing');
-      return;
+      return null;
     }
     
     setIsAnalyzing(true);
@@ -448,9 +455,13 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       
       setAnalyzedProducts(results);
       toast.success('Analysis completed successfully');
+      
+      // Return the mapping result including the csv_url
+      return mappingResult;
     } catch (error) {
       console.error('Error analyzing products:', error);
       toast.error('Error analyzing products. Please try again.');
+      return null;
     } finally {
       setIsAnalyzing(false);
     }
@@ -547,7 +558,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }, 500);
       
       // Make API call to process the files
-      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder_json', {
+      const response = await fetch('http://localhost:8000/provider/extract_provider_pricing_from_excel_folder_json', {
         method: 'POST',
         body: formData,
       });
@@ -716,7 +727,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }, updateInterval);
       
       // Make API call to process the folder
-      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder_json', {
+      const response = await fetch('http://localhost:8000/provider/extract_provider_pricing_from_excel_folder_json', {
         method: 'POST',
         body: formData,
       });

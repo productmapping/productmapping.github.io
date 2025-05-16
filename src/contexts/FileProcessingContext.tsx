@@ -233,7 +233,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       formData.append('file', file);
       
       // Make API call to extract data from Excel
-      const response = await fetch('http://localhost:8000/bid/extract_items_from_excel', {
+      const response = await fetch('https://batgroup.strikingo.com/bid/extract_items_from_excel', {
         method: 'POST',
         body: formData,
       });
@@ -347,7 +347,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
                   JSON.stringify(requestPayload.provider_pricing_detail_list[0]) : 'None');
       
       // Make API call to map items to provider pricing
-      const response = await fetch('http://localhost:8000/bid/map_items_to_provider_pricing_json', {
+      const response = await fetch('https://batgroup.strikingo.com/bid/map_items_to_provider_pricing_json', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -558,7 +558,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }, 500);
       
       // Make API call to process the files
-      const response = await fetch('http://localhost:8000/provider/extract_provider_pricing_from_excel_folder_json', {
+      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder_json', {
         method: 'POST',
         body: formData,
       });
@@ -727,7 +727,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }, updateInterval);
       
       // Make API call to process the folder
-      const response = await fetch('http://localhost:8000/provider/extract_provider_pricing_from_excel_folder_json', {
+      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder_json', {
         method: 'POST',
         body: formData,
       });

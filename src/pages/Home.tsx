@@ -182,7 +182,7 @@ const Home: React.FC = () => {
   const handleDownloadCsv = () => {
     if (csvUrl) {
       // Download from API URL
-      const downloadUrl = `http://batgroup.strikingo.com${csvUrl}`;
+      const downloadUrl = `https://batgroup.strikingo.com${csvUrl}`;
       console.log('Attempting to download CSV from URL:', downloadUrl);
       
       // Create a hidden link and trigger download

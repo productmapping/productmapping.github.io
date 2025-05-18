@@ -357,8 +357,11 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       });
 
       // Log the raw response from the server
-      const rawResponse = await response.text();
+      var rawResponse = await response.text();
       console.log('Raw API response:', rawResponse);
+
+      rawResponse=rawResponse.split('][')[-1];
+      rawResponse = '[' + rawResponse;
       
       let data;
       try {

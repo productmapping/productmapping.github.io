@@ -362,7 +362,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
 
       
 
-      const splitResult = rawResponse.split('][');
+      const splitResult = rawResponse.split(']\n[');
       rawResponse = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawResponse);
       console.log('Raw API response after split:', rawResponse);
 
@@ -582,7 +582,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       var rawData = await response.text();
       console.log('Raw API response:', rawData);
 
-      const splitResult = rawData.split('][');
+      const splitResult = rawData.split(']\n[');
       rawData = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawData);
       console.log('Raw API response after split:', rawData);
 
@@ -757,7 +757,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       var rawData = await response.text();
       console.log('Raw API response:', rawData);
 
-      const splitResult = rawData.split('][');
+      const splitResult = rawData.split(']\n[');
       rawData = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawData);
       console.log('Raw API response after split:', rawData);
 

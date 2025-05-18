@@ -754,6 +754,8 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
 
       rawData=rawData.split('][')[-1];
       rawData = '[' + rawData;
+      console.log('Raw API response after split:', rawData);
+
 
       let data;
       try {

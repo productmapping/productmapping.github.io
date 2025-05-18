@@ -362,8 +362,8 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
 
       
 
-      const splitResult = rawResponse.split(']\n[');
-      rawResponse = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawResponse);
+      const splitResult = rawResponse.split('{"results"');
+      rawResponse = '{"results"' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawResponse);
       console.log('Raw API response after split:', rawResponse);
 
       

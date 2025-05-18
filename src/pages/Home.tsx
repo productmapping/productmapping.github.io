@@ -326,28 +326,6 @@ const Home: React.FC = () => {
                 <CardTitle>{t('reference.title')}</CardTitle>
                 <CardDescription>{t('reference.subtitle')}</CardDescription>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  // Use the global reference we created
-                  if (window.folderUploadInput) {
-                    window.folderUploadInput.click();
-                  } else {
-                    // Fallback to direct DOM method
-                    const folderInput = document.getElementById('folder-upload-input');
-                    if (folderInput) {
-                      folderInput.click();
-                    } else {
-                      toast.error('Folder upload not available');
-                    }
-                  }
-                }}
-                className="flex items-center gap-1"
-              >
-                <Upload className="h-4 w-4" />
-                {t('reference.uploadFolder') || 'Upload Folder'}
-              </Button>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Upload Section */}

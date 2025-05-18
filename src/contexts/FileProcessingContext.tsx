@@ -565,6 +565,8 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         method: 'POST',
         body: formData,
       });
+
+      
       
       clearInterval(progressInterval);
       
@@ -572,9 +574,16 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
       
-      const rawData = await response.text(); // Get raw response text
+      var rawData = await response.text(); // Get raw response text
       console.log('Raw API response:', rawData);
-      
+
+            // Log the raw response from the server
+      var rawData = await response.text();
+      console.log('Raw API response:', rawData);
+
+      rawData=rawData.split('][')[-1];
+      rawData = '[' + rawData;
+
       let data;
       try {
         data = JSON.parse(rawData);
@@ -741,7 +750,25 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
       
-      const data: ProviderPricingResponse = await response.json();
+      var rawData = await response.text(); // Get raw response text
+      console.log('Raw API response:', rawData);
+
+            // Log the raw response from the server
+      var rawData = await response.text();
+      console.log('Raw API response:', rawData);
+
+      rawData=rawData.split('][')[-1];
+      rawData = '[' + rawData;
+
+      let data;
+      try {
+        data = JSON.parse(rawData);
+        console.log('Parsed API response:', data);
+      } catch (parseError) {
+        console.error('Failed to parse API response as JSON:', parseError);
+        throw new Error('Failed to parse server response');
+      }
+      
       setProviderPricingData(data);
       setFolderProcessingProgress(100);
       

@@ -360,8 +360,12 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       var rawResponse = await response.text();
       console.log('Raw API response:', rawResponse);
 
-      rawResponse=rawResponse.split('][')[-1];
-      rawResponse = '[' + rawResponse;
+      
+
+      const splitResult = rawResponse.split('][');
+      rawResponse = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawResponse);
+      console.log('Raw API response after split:', rawResponse);
+
       
       let data;
       try {
@@ -574,15 +578,16 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }
       
 
-            // Log the raw response from the server
+      // Log the raw response from the server
       var rawData = await response.text();
       console.log('Raw API response:', rawData);
 
-      rawData=rawData.split('][')[-1];
-      rawData = '[' + rawData;
-
+      const splitResult = rawData.split('][');
+      rawData = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawData);
       console.log('Raw API response after split:', rawData);
-      let data;
+
+
+      let data: ProviderPricingResponse | any[];
       try {
         data = JSON.parse(rawData);
         console.log('Parsed API response:', data);
@@ -748,12 +753,12 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
       
-            // Log the raw response from the server
+      // Log the raw response from the server
       var rawData = await response.text();
       console.log('Raw API response:', rawData);
 
-      rawData=rawData.split('][')[-1];
-      rawData = '[' + rawData;
+      const splitResult = rawData.split('][');
+      rawData = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawData);
       console.log('Raw API response after split:', rawData);
 
 

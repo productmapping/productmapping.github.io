@@ -541,11 +541,7 @@ const Home: React.FC = () => {
                 {/* Analysis progress bar when analyzing - Moved here from results section */}
                 {isAnalyzing && (
                   <div className="mb-6 space-y-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">{t('analysis.processingProducts')}</span>
-                      <span className="text-sm font-medium">{Math.round(analyzeProgress)}%</span>
-                    </div>
-                    <Progress value={analyzeProgress} className="h-2" />
+                    
                     <div className="flex justify-between items-center text-sm text-muted-foreground mt-2">
                       <span>
                         {t('analysis.productCount').replace('{count}', extractedProducts.length.toString())}

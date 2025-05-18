@@ -567,15 +567,12 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       });
 
       
-      
       clearInterval(progressInterval);
       
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
       
-      var rawData = await response.text(); // Get raw response text
-      console.log('Raw API response:', rawData);
 
             // Log the raw response from the server
       var rawData = await response.text();
@@ -584,6 +581,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       rawData=rawData.split('][')[-1];
       rawData = '[' + rawData;
 
+      console.log('Raw API response after split:', rawData);
       let data;
       try {
         data = JSON.parse(rawData);

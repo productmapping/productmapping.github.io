@@ -558,7 +558,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }, 500);
       
       // Make API call to process the files
-      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder_json', {
+      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder', {
         method: 'POST',
         body: formData,
       });
@@ -727,7 +727,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       }, updateInterval);
       
       // Make API call to process the folder
-      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder_json', {
+      const response = await fetch('https://batgroup.strikingo.com/provider/extract_provider_pricing_from_excel_folder', {
         method: 'POST',
         body: formData,
       });

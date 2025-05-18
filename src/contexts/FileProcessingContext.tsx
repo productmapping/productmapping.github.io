@@ -347,7 +347,7 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
                   JSON.stringify(requestPayload.provider_pricing_detail_list[0]) : 'None');
       
       // Make API call to map items to provider pricing
-      const response = await fetch('https://batgroup.strikingo.com/bid/map_items_to_provider_pricing_json', {
+      const response = await fetch('https://batgroup.strikingo.com/bid/map_items_to_provider_pricing', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

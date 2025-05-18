@@ -182,6 +182,7 @@ const Home: React.FC = () => {
   const handleDownloadCsv = () => {
     if (csvUrl) {
       // Download from API URL
+
       const downloadUrl = `https://batgroup.strikingo.com${csvUrl}`;
       console.log('Attempting to download CSV from URL:', downloadUrl);
       
@@ -609,22 +610,18 @@ const Home: React.FC = () => {
                 }
               </CardDescription>
             </div>
-            {analyzedProducts.length > 0 && (
-              <Button
-                onClick={handleDownloadCsv}
-                className="bg-tech-blue hover:bg-tech-blue/90"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                {t('home.actions.download')}
-              </Button>
-            )}
           </CardHeader>
           <CardContent>
-            <div>
-              <ProductTable
-                products={analyzedProducts}
-                isAnalyzedData={true}
-              />
+            <div className="flex justify-center">
+              {analyzedProducts.length > 0 && (
+                <Button
+                  onClick={handleDownloadCsv}
+                  className="bg-tech-blue hover:bg-tech-blue/90"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  {t('home.actions.downloadResults')}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

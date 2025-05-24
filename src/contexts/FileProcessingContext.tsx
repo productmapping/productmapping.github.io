@@ -583,8 +583,10 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.log('Raw API response:', rawData);
 
       const splitResult = rawData.split(']\n[');
-      rawData = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawData);
-      console.log('Raw API response after split:', rawData);
+      if (splitResult.length > 1) {
+        rawData = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawData);
+        console.log('Raw API response after split:', rawData);
+      }
 
 
       let data: ProviderPricingResponse | any[];
@@ -758,9 +760,11 @@ export const FileProcessingProvider: React.FC<{ children: ReactNode }> = ({ chil
       console.log('Raw API response:', rawData);
 
       const splitResult = rawData.split(']\n[');
-      rawData = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawData);
-      console.log('Raw API response after split:', rawData);
-
+      if (splitResult.length > 1) {
+        rawData = '[' + (splitResult.length > 0 ? splitResult[splitResult.length - 1] : rawData);
+        console.log('Raw API response after split:', rawData);
+      }
+     
 
       let data;
       try {
